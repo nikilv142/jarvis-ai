@@ -1,10 +1,11 @@
 from flask import Flask, render_template, request, jsonify
 from groq import Groq
+import os
 
 app = Flask(__name__)
 
 # 🔑 Replace with your Groq API key
-client = Groq(api_key="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")
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 def get_ai_response(message):
     try:
