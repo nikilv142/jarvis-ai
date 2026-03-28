@@ -66,6 +66,16 @@ function speak(text) {
     speech.lang = "en-US";
     window.speechSynthesis.speak(speech);
 }
+
+// ⏸ Pause
+function pauseSpeech() {
+    window.speechSynthesis.pause();
+}
+
+// ▶️ Resume
+function resumeSpeech() {
+    window.speechSynthesis.resume();
+}
 </script>
 
 </body>
