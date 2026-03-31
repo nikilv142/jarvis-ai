@@ -60,3 +60,17 @@ button {
     border-radius: 8px;
     cursor: pointer;
 }
+textarea {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: Arial;
+    font-size: 14px;
+    max-height: 150px;
+    overflow-y: auto;
+    background: #40414f;
+    color: white;
+}
