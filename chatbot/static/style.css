@@ -76,9 +76,24 @@ button {
     cursor: pointer;
 }
 
-/* Hover */
 button:hover {
     background: #16a46b;
+}
+
+/* Copy button */
+.copy-btn {
+    margin-top: 8px;
+    padding: 5px 10px;
+    font-size: 12px;
+    background: #555;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+}
+
+.copy-btn:hover {
+    background: #777;
 }
 
 /* Animation */
@@ -93,7 +108,7 @@ button:hover {
     }
 }
 
-/* 📱 Mobile Responsive */
+/* Mobile */
 @media (max-width: 600px) {
     .chat-area {
         padding: 10px;
