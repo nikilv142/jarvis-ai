@@ -11,7 +11,7 @@ def get_ai_response(message):
     try:
         response = client.chat.completions.create(
             messages=[
-                {"role": "system", "content": "Answer clearly in points and structured format."},
+                {"role": "system", "content": "Respond clearly in plain text without using * or markdown symbols. Use simple point-wise format."},
                 {"role": "user", "content": message}
             ],
             model="openai/gpt-oss-120b"
