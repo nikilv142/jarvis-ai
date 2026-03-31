@@ -50,8 +50,11 @@ function send() {
         let botDiv = document.createElement("div");
         botDiv.className = "bot";
 
-        let formattedText = data.reply.replace(/\n/g, "<br>");
-
+        let formattedText = data.reply
+            .replace(/\*\*/g, "")   // remove **
+            .replace(/\*/g, "")     // remove *
+            .replace(/\n/g, "<br>");
+        
         botDiv.innerHTML = `
             <div class="message">${formattedText}</div>
             <button class="copy-btn" onclick="copyText(this)">📋 Copy</button>
