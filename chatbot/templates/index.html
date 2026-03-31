@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Jarvis AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -24,11 +25,16 @@ function send() {
     let input = document.getElementById("input");
     let msg = input.value;
 
-    if (!msg) return;
+    if (!msg.trim()) return;
 
     let chat = document.getElementById("chat-box");
 
     chat.innerHTML += `<div class="user">${msg}</div>`;
+
+    let typingDiv = document.createElement("div");
+    typingDiv.className = "bot";
+    typingDiv.innerText = "Jarvis is typing...";
+    chat.appendChild(typingDiv);
 
     fetch("/chat", {
         method: "POST",
@@ -37,18 +43,44 @@ function send() {
     })
     .then(res => res.json())
     .then(data => {
-        chat.innerHTML += `<div class="bot">${data.reply}</div>`;
+        typingDiv.remove();
+
+        let botDiv = document.createElement("div");
+        botDiv.className = "bot";
+        chat.appendChild(botDiv);
+
+        let text = data.reply;
+        let i = 0;
+
+        function typeEffect() {
+            if (i < text.length) {
+                botDiv.innerHTML += text.charAt(i);
+                i++;
+                setTimeout(typeEffect, 10);
+            }
+        }
+
+        typeEffect();
         chat.scrollTop = chat.scrollHeight;
     });
 
     input.value = "";
+    input.style.height = "auto";
 }
-// 🔥 ENTER KEY SUPPORT
+
+// Enter = send, Shift+Enter = new line
 document.getElementById("input").addEventListener("keydown", function(event) {
     if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
         send();
     }
+});
+
+// Auto expand textarea
+const textarea = document.getElementById("input");
+textarea.addEventListener("input", () => {
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
 });
 </script>
 
