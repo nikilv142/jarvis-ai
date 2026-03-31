@@ -21,6 +21,8 @@
 </div>
 
 <script>
+
+// SEND MESSAGE
 function send() {
     let input = document.getElementById("input");
     let msg = input.value;
@@ -47,20 +49,15 @@ function send() {
 
         let botDiv = document.createElement("div");
         botDiv.className = "bot";
+
+        let formattedText = data.reply.replace(/\n/g, "<br>");
+
+        botDiv.innerHTML = `
+            <div class="message">${formattedText}</div>
+            <button class="copy-btn" onclick="copyText(this)">📋 Copy</button>
+        `;
+
         chat.appendChild(botDiv);
-
-        let text = data.reply;
-        let i = 0;
-
-        function typeEffect() {
-            if (i < text.length) {
-                botDiv.innerHTML += text.charAt(i);
-                i++;
-                setTimeout(typeEffect, 10);
-            }
-        }
-
-        typeEffect();
         chat.scrollTop = chat.scrollHeight;
     });
 
@@ -68,7 +65,7 @@ function send() {
     input.style.height = "auto";
 }
 
-// Enter = send, Shift+Enter = new line
+// ENTER = SEND | SHIFT+ENTER = NEW LINE
 document.getElementById("input").addEventListener("keydown", function(event) {
     if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
@@ -76,12 +73,25 @@ document.getElementById("input").addEventListener("keydown", function(event) {
     }
 });
 
-// Auto expand textarea
+// AUTO EXPAND TEXTAREA
 const textarea = document.getElementById("input");
 textarea.addEventListener("input", () => {
     textarea.style.height = "auto";
     textarea.style.height = textarea.scrollHeight + "px";
 });
+
+// COPY FUNCTION
+function copyText(button) {
+    let text = button.parentElement.querySelector(".message").innerText;
+
+    navigator.clipboard.writeText(text);
+
+    button.innerText = "✅ Copied!";
+    setTimeout(() => {
+        button.innerText = "📋 Copy";
+    }, 1500);
+}
+
 </script>
 
 </body>
