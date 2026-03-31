@@ -22,8 +22,8 @@
 
 <script>
 
-// SEND MESSAGE
-function send() {
+// 🚀 STREAMING SEND FUNCTION
+async function send() {
     let input = document.getElementById("input");
     let msg = input.value;
 
@@ -31,44 +31,56 @@ function send() {
 
     let chat = document.getElementById("chat-box");
 
+    // Show user message
     chat.innerHTML += `<div class="user">${msg}</div>`;
 
-    let typingDiv = document.createElement("div");
-    typingDiv.className = "bot";
-    typingDiv.innerText = "Jarvis is typing...";
-    chat.appendChild(typingDiv);
-
-    fetch("/chat", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({message: msg})
-    })
-    .then(res => res.json())
-    .then(data => {
-        typingDiv.remove();
-
-        let botDiv = document.createElement("div");
-        botDiv.className = "bot";
-
-        let formattedText = data.reply
-            .replace(/\*\*/g, "")   // remove **
-            .replace(/\*/g, "")     // remove *
-            .replace(/\n/g, "<br>");
-        
-        botDiv.innerHTML = `
-            <div class="message">${formattedText}</div>
-            <button class="copy-btn" onclick="copyText(this)">📋 Copy</button>
-        `;
-
-        chat.appendChild(botDiv);
-        chat.scrollTop = chat.scrollHeight;
-    });
+    // Create bot message container
+    let botDiv = document.createElement("div");
+    botDiv.className = "bot";
+    chat.appendChild(botDiv);
 
     input.value = "";
     input.style.height = "auto";
+
+    const response = await fetch("/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({message: msg})
+    });
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+
+    let resultText = "";
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        let chunk = decoder.decode(value);
+        resultText += chunk;
+
+        // Clean text formatting
+        let cleanText = resultText
+            .replace(/\*\*/g, "")
+            .replace(/\*/g, "")
+            .replace(/`/g, "")
+            .replace(/\n/g, "<br>");
+
+        // Update UI with streaming text + copy button
+        botDiv.innerHTML = `
+            <div class="message">${cleanText}</div>
+            <button class="copy-btn" onclick="copyText(this)">📋 Copy</button>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        // Optional smooth effect
+        await new Promise(r => setTimeout(r, 10));
+    }
 }
 
-// ENTER = SEND | SHIFT+ENTER = NEW LINE
+// ⌨️ ENTER = SEND | SHIFT+ENTER = NEW LINE
 document.getElementById("input").addEventListener("keydown", function(event) {
     if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
@@ -76,14 +88,14 @@ document.getElementById("input").addEventListener("keydown", function(event) {
     }
 });
 
-// AUTO EXPAND TEXTAREA
+// 📏 AUTO EXPAND TEXTAREA
 const textarea = document.getElementById("input");
 textarea.addEventListener("input", () => {
     textarea.style.height = "auto";
     textarea.style.height = textarea.scrollHeight + "px";
 });
 
-// COPY FUNCTION
+// 📋 COPY FUNCTION
 function copyText(button) {
     let text = button.parentElement.querySelector(".message").innerText;
 
