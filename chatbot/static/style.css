@@ -5,72 +5,110 @@ body {
     color: white;
 }
 
+/* Container */
 .container {
     display: flex;
     flex-direction: column;
     height: 100vh;
 }
 
+/* Chat area */
 .chat-area {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: 15px;
     max-width: 800px;
     margin: auto;
+    width: 100%;
 }
 
+/* Messages */
 .bot {
     background: #444654;
     padding: 12px;
-    margin: 10px 0;
+    margin: 8px 0;
     border-radius: 8px;
-    max-width: 80%;
+    max-width: 85%;
+    animation: fadeIn 0.3s ease-in-out;
 }
 
 .user {
     background: #19c37d;
     padding: 12px;
-    margin: 10px 0;
+    margin: 8px 0;
     border-radius: 8px;
-    max-width: 80%;
+    max-width: 85%;
     margin-left: auto;
+    animation: fadeIn 0.3s ease-in-out;
 }
 
+/* Input area */
 .input-area {
     display: flex;
-    padding: 15px;
+    padding: 10px;
     background: #40414f;
     position: sticky;
     bottom: 0;
 }
 
-input {
+/* Textarea */
+textarea {
     flex: 1;
-    padding: 12px;
+    padding: 10px;
     border-radius: 8px;
     border: none;
     outline: none;
+    resize: none;
+    font-size: 14px;
+    max-height: 120px;
+    overflow-y: auto;
+    background: #343541;
+    color: white;
 }
 
+/* Button */
 button {
-    margin-left: 10px;
-    padding: 12px 20px;
+    margin-left: 8px;
+    padding: 10px 15px;
     background: #19c37d;
     border: none;
     border-radius: 8px;
     cursor: pointer;
 }
-textarea {
-    flex: 1;
-    padding: 12px;
-    border-radius: 8px;
-    border: none;
-    outline: none;
-    resize: none;
-    font-family: Arial;
-    font-size: 14px;
-    max-height: 150px;
-    overflow-y: auto;
-    background: #40414f;
-    color: white;
+
+/* Hover */
+button:hover {
+    background: #16a46b;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 📱 Mobile Responsive */
+@media (max-width: 600px) {
+    .chat-area {
+        padding: 10px;
+    }
+
+    .bot, .user {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    textarea {
+        font-size: 13px;
+    }
+
+    button {
+        padding: 8px 12px;
+    }
 }
