@@ -2,111 +2,111 @@
 <html>
 <head>
     <title>Jarvis AI</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/style.css">
+
+    <style>
+        body {
+            margin: 0;
+            background: radial-gradient(circle, #020617, #000);
+            font-family: 'Orbitron', sans-serif;
+            color: #00ffff;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 10px;
+            text-shadow: 0 0 10px cyan;
+        }
+
+        #chatbox {
+            height: 80vh;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .msg {
+            margin: 10px;
+            padding: 12px;
+            border-radius: 12px;
+            max-width: 70%;
+            box-shadow: 0 0 10px rgba(0,255,255,0.3);
+        }
+
+        .user {
+            background: #22c55e;
+            color: black;
+            margin-left: auto;
+        }
+
+        .bot {
+            background: #020617;
+            border: 1px solid cyan;
+        }
+
+        #inputArea {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            background: black;
+        }
+
+        input {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: #020617;
+            color: white;
+        }
+
+        button {
+            padding: 15px;
+            background: cyan;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #00bcd4;
+        }
+    </style>
 </head>
+
 <body>
 
-<div class="container">
+<h1>⚡ JARVIS AI</h1>
 
-    <div class="chat-area" id="chat-box">
-        <div class="bot">Hello Nikhil 👋 I am your Jarvis</div>
-    </div>
+<div id="chatbox"></div>
 
-    <div class="input-area">
-        <textarea id="input" placeholder="Message Jarvis..." rows="1"></textarea>
-        <button onclick="send()">➤</button>
-    </div>
-
+<div id="inputArea">
+    <input id="input" placeholder="Ask me anything...">
+    <button onclick="sendMessage()">Send</button>
 </div>
 
 <script>
-
-// 🚀 STREAMING SEND FUNCTION
-async function send() {
+async function sendMessage() {
     let input = document.getElementById("input");
-    let msg = input.value;
+    let message = input.value;
 
-    if (!msg.trim()) return;
+    if (!message) return;
 
-    let chat = document.getElementById("chat-box");
+    let chatbox = document.getElementById("chatbox");
 
-    // Show user message
-    chat.innerHTML += `<div class="user">${msg}</div>`;
-
-    // Create bot message container
-    let botDiv = document.createElement("div");
-    botDiv.className = "bot";
-    chat.appendChild(botDiv);
-
+    chatbox.innerHTML += `<div class="msg user">${message}</div>`;
     input.value = "";
-    input.style.height = "auto";
 
-    const response = await fetch("/chat", {
+    let response = await fetch("/chat", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({message: msg})
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: message })
     });
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
+    let data = await response.json();
 
-    let resultText = "";
-
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        let chunk = decoder.decode(value);
-        resultText += chunk;
-
-        // Clean text formatting
-        let cleanText = resultText
-            .replace(/\*\*/g, "")
-            .replace(/\*/g, "")
-            .replace(/`/g, "")
-            .replace(/\n/g, "<br>");
-
-        // Update UI with streaming text + copy button
-        botDiv.innerHTML = `
-            <div class="message">${cleanText}</div>
-            <button class="copy-btn" onclick="copyText(this)">📋 Copy</button>
-        `;
-
-        chat.scrollTop = chat.scrollHeight;
-
-        // Optional smooth effect
-        await new Promise(r => setTimeout(r, 10));
-    }
+    chatbox.innerHTML += `<div class="msg bot">${data.reply}</div>`;
+    chatbox.scrollTop = chatbox.scrollHeight;
 }
-
-// ⌨️ ENTER = SEND | SHIFT+ENTER = NEW LINE
-document.getElementById("input").addEventListener("keydown", function(event) {
-    if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-        send();
-    }
-});
-
-// 📏 AUTO EXPAND TEXTAREA
-const textarea = document.getElementById("input");
-textarea.addEventListener("input", () => {
-    textarea.style.height = "auto";
-    textarea.style.height = textarea.scrollHeight + "px";
-});
-
-// 📋 COPY FUNCTION
-function copyText(button) {
-    let text = button.parentElement.querySelector(".message").innerText;
-
-    navigator.clipboard.writeText(text);
-
-    button.innerText = "✅ Copied!";
-    setTimeout(() => {
-        button.innerText = "📋 Copy";
-    }, 1500);
-}
-
 </script>
 
 </body>
