@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Jarvis Voice AI</title>
+    <title>Jarvis</title>
 
     <style>
         body {
@@ -21,7 +21,6 @@
             font-size: 18px;
         }
 
-        /* 🌀 Circle */
         .circle {
             width: 200px;
             height: 200px;
@@ -53,10 +52,7 @@
             padding: 10px;
         }
 
-        .msg {
-            margin: 10px;
-        }
-
+        .msg { margin: 10px; }
         .user { color: lightgreen; }
         .bot { color: cyan; }
 
@@ -73,7 +69,7 @@
 
 <body>
 
-<h1>JARVIS⚡</h1>
+<h1>⚡ JARVIS AI</h1>
 <div id="status">Click Start to activate Jarvis</div>
 
 <div id="jarvisCircle" class="circle"></div>
@@ -111,11 +107,7 @@ function startJarvis() {
 
         console.log("Heard:", text);
 
-        // Stop speaking if user talks
-        if (isSpeaking) {
-            speechSynthesis.cancel();
-            isSpeaking = false;
-        }
+        // ❌ REMOVED interrupt logic
 
         document.getElementById("jarvisCircle").classList.add("listening");
 
@@ -144,7 +136,7 @@ async function sendToAI(message) {
     speak(data.reply);
 }
 
-// 🔊 Speak
+// 🔊 Speak (no interruption)
 function speak(text) {
     let speech = new SpeechSynthesisUtterance(text);
     speech.lang = "en-US";
