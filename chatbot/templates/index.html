@@ -1,62 +1,138 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Jarvis AI</title>
+    <title>Jarvis Voice AI</title>
+
     <style>
         body {
-            background: black;
+            margin: 0;
+            background: radial-gradient(circle, #020617, #000);
             color: cyan;
             font-family: Arial;
             text-align: center;
         }
 
+        h1 {
+            text-shadow: 0 0 10px cyan;
+        }
+
+        #status {
+            margin: 10px;
+            font-size: 18px;
+        }
+
         #chatbox {
-            height: 80vh;
+            height: 70vh;
             overflow-y: auto;
+            padding: 15px;
         }
 
-        .user {
-            color: lightgreen;
+        .msg {
+            margin: 10px;
+            padding: 10px;
         }
 
-        .bot {
-            color: cyan;
-        }
+        .user { color: lightgreen; }
+        .bot { color: cyan; }
     </style>
 </head>
+
 <body>
 
 <h1>⚡ JARVIS AI</h1>
+<div id="status">Status: Waiting for "Hey Jarvis"...</div>
 
 <div id="chatbox"></div>
 
-<input id="input" placeholder="Ask me anything...">
-<button onclick="sendMessage()">Send</button>
-
 <script>
-async function sendMessage() {
-    let input = document.getElementById("input");
-    let message = input.value;
+let recognition;
+let isListening = false;
+let isSpeaking = false;
 
-    if (!message) return;
-
+function addMessage(text, className) {
     let chatbox = document.getElementById("chatbox");
+    let div = document.createElement("div");
+    div.className = "msg " + className;
+    div.innerHTML = text;
+    chatbox.appendChild(div);
+    chatbox.scrollTop = chatbox.scrollHeight;
+}
 
-    chatbox.innerHTML += `<p class="user">You: ${message}</p>`;
-    input.value = "";
+// 🎤 Start continuous listening
+function startJarvis() {
+    recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
 
+    recognition.onresult = function(event) {
+        let text = event.results[event.results.length - 1][0].transcript.toLowerCase();
+
+        console.log("Heard:", text);
+
+        // 🛑 Stop speaking if user talks
+        if (isSpeaking) {
+            speechSynthesis.cancel();
+            isSpeaking = false;
+        }
+
+        // 🔥 Wake word
+        if (text.includes("hey jarvis")) {
+            document.getElementById("status").innerText = "Listening...";
+            return;
+        }
+
+        // After wake word → send message
+        if (document.getElementById("status").innerText === "Listening...") {
+            addMessage("You: " + text, "user");
+            sendToAI(text);
+            document.getElementById("status").innerText = "Waiting for \"Hey Jarvis\"...";
+        }
+    };
+
+    recognition.onerror = function() {
+        recognition.start();
+    };
+
+    recognition.onend = function() {
+        recognition.start(); // auto restart
+    };
+
+    recognition.start();
+}
+
+// 🤖 Send to backend
+async function sendToAI(message) {
     let response = await fetch("/chat", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ message: message })
     });
 
     let data = await response.json();
 
-    chatbox.innerHTML += `<p class="bot">Jarvis: ${data.reply}</p>`;
+    addMessage("Jarvis: " + data.reply, "bot");
+
+    speak(data.reply);
 }
+
+// 🔊 Speak
+function speak(text) {
+    let speech = new SpeechSynthesisUtterance(text);
+    speech.lang = "en-US";
+    speech.rate = 1;
+
+    isSpeaking = true;
+
+    speech.onend = () => {
+        isSpeaking = false;
+    };
+
+    speechSynthesis.speak(speech);
+}
+
+// 🚀 Start Jarvis automatically
+startJarvis();
 </script>
 
 </body>
