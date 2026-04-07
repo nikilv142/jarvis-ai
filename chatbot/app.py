@@ -17,7 +17,7 @@ def chat():
 
     try:
         response = client.chat.completions.create(
-            model="llama3-8b-8192",
+            model="openai/gpt-oss-120b",
             messages=[
                 {"role": "system", "content": "You are Jarvis, a smart AI assistant."},
                 {"role": "user", "content": user_message}
