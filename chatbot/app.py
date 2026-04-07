@@ -1,10 +1,11 @@
 from flask import Flask, render_template, request, jsonify
-import requests
+from groq import Groq
 import os
 
 app = Flask(__name__)
 
-API_KEY = os.environ.get("API_KEY")
+# ✅ Get API key from Render
+client = Groq(api_key=os.environ.get("API_KEY"))
 
 @app.route("/")
 def home():
@@ -15,32 +16,20 @@ def chat():
     user_message = request.json.get("message")
 
     try:
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {API_KEY}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "openai/gpt-oss-120b",
-                "messages": [
-                    {"role": "system", "content": "You are Jarvis, a smart AI assistant."},
-                    {"role": "user", "content": user_message}
-                ]
-            }
+        response = client.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[
+                {"role": "system", "content": "You are Jarvis, a smart AI assistant."},
+                {"role": "user", "content": user_message}
+            ]
         )
 
-        data = response.json()
+        reply = response.choices[0].message.content
 
-        if "choices" not in data:
-            return jsonify({"reply": "❌ AI Error"})
-
-        reply = data["choices"][0]["message"]["content"]
         return jsonify({"reply": reply})
 
     except Exception as e:
-        return jsonify({"reply": "❌ Server Error"})
-
+        return jsonify({"reply": "❌ Error: " + str(e)})
 
 # ✅ IMPORTANT FOR RENDER
 if __name__ == "__main__":
