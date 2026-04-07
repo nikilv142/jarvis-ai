@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Jarvis Voice AI</title>
+    <title>Iron Man Jarvis</title>
 
     <style>
         body {
             margin: 0;
-            background: radial-gradient(circle, #020617, #000);
+            background: black;
             color: cyan;
             font-family: Arial;
             text-align: center;
         }
 
         h1 {
-            text-shadow: 0 0 10px cyan;
+            text-shadow: 0 0 20px cyan;
         }
 
         #status {
@@ -21,15 +21,40 @@
             font-size: 18px;
         }
 
+        /* 🌀 Jarvis Circle */
+        .circle {
+            width: 200px;
+            height: 200px;
+            border: 4px solid cyan;
+            border-radius: 50%;
+            margin: 30px auto;
+            box-shadow: 0 0 30px cyan;
+            animation: rotate 5s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .listening {
+            border-color: lime;
+            box-shadow: 0 0 50px lime;
+        }
+
+        .speaking {
+            border-color: red;
+            box-shadow: 0 0 50px red;
+        }
+
         #chatbox {
-            height: 70vh;
+            height: 50vh;
             overflow-y: auto;
-            padding: 15px;
+            padding: 10px;
         }
 
         .msg {
             margin: 10px;
-            padding: 10px;
         }
 
         .user { color: lightgreen; }
@@ -40,14 +65,16 @@
 <body>
 
 <h1>⚡ JARVIS AI</h1>
-<div id="status">Status: Waiting for "Hey Jarvis"...</div>
+<div id="status">Waiting for "Hey Jarvis"...</div>
+
+<div id="jarvisCircle" class="circle"></div>
 
 <div id="chatbox"></div>
 
 <script>
 let recognition;
-let isListening = false;
 let isSpeaking = false;
+let isActive = false;
 
 function addMessage(text, className) {
     let chatbox = document.getElementById("chatbox");
@@ -58,11 +85,10 @@ function addMessage(text, className) {
     chatbox.scrollTop = chatbox.scrollHeight;
 }
 
-// 🎤 Start continuous listening
+// 🎤 Start Jarvis
 function startJarvis() {
     recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.continuous = true;
-    recognition.interimResults = false;
     recognition.lang = "en-US";
 
     recognition.onresult = function(event) {
@@ -70,38 +96,37 @@ function startJarvis() {
 
         console.log("Heard:", text);
 
-        // 🛑 Stop speaking if user talks
+        // Stop speaking if user talks
         if (isSpeaking) {
             speechSynthesis.cancel();
             isSpeaking = false;
         }
 
-        // 🔥 Wake word
+        // Wake word
         if (text.includes("hey jarvis")) {
             document.getElementById("status").innerText = "Listening...";
+            document.getElementById("jarvisCircle").classList.add("listening");
+            isActive = true;
             return;
         }
 
-        // After wake word → send message
-        if (document.getElementById("status").innerText === "Listening...") {
+        if (isActive) {
             addMessage("You: " + text, "user");
             sendToAI(text);
-            document.getElementById("status").innerText = "Waiting for \"Hey Jarvis\"...";
+
+            isActive = false;
+            document.getElementById("jarvisCircle").classList.remove("listening");
+            document.getElementById("status").innerText = "Waiting for 'Hey Jarvis'...";
         }
     };
 
-    recognition.onerror = function() {
-        recognition.start();
-    };
-
-    recognition.onend = function() {
-        recognition.start(); // auto restart
-    };
+    recognition.onerror = () => recognition.start();
+    recognition.onend = () => recognition.start();
 
     recognition.start();
 }
 
-// 🤖 Send to backend
+// 🤖 AI Request
 async function sendToAI(message) {
     let response = await fetch("/chat", {
         method: "POST",
@@ -120,18 +145,19 @@ async function sendToAI(message) {
 function speak(text) {
     let speech = new SpeechSynthesisUtterance(text);
     speech.lang = "en-US";
-    speech.rate = 1;
 
     isSpeaking = true;
+    document.getElementById("jarvisCircle").classList.add("speaking");
 
     speech.onend = () => {
         isSpeaking = false;
+        document.getElementById("jarvisCircle").classList.remove("speaking");
     };
 
     speechSynthesis.speak(speech);
 }
 
-// 🚀 Start Jarvis automatically
+// 🚀 Start automatically
 startJarvis();
 </script>
 
