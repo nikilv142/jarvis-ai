@@ -91,6 +91,7 @@ function addMessage(text, className) {
     chatbox.scrollTop = chatbox.scrollHeight;
 }
 
+// 🚀 Start Jarvis
 function startJarvis() {
     if (isRunning) return;
 
@@ -104,13 +105,11 @@ function startJarvis() {
     recognition.onresult = function(event) {
         let text = event.results[event.results.length - 1][0].transcript.toLowerCase();
 
-        console.log("Heard:", text);
-
         document.getElementById("jarvisCircle").classList.add("listening");
 
         addMessage("You: " + text, "user");
 
-        // 🛑 STOP MIC BEFORE AI SPEAKS
+        // 🛑 Stop mic before speaking
         recognition.stop();
 
         sendToAI(text);
@@ -148,9 +147,20 @@ async function sendToAI(message) {
     speak(data.reply);
 }
 
+// 🧹 CLEAN TEXT
+function cleanText(text) {
+    return text
+        .replace(/[#*`>-]/g, "")
+        .replace(/\n/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
 // 🔊 Speak
 function speak(text) {
-    let speech = new SpeechSynthesisUtterance(text);
+    let clean = cleanText(text);
+
+    let speech = new SpeechSynthesisUtterance(clean);
     speech.lang = "en-US";
 
     document.getElementById("jarvisCircle").classList.remove("listening");
@@ -159,7 +169,7 @@ function speak(text) {
     speech.onend = () => {
         document.getElementById("jarvisCircle").classList.remove("speaking");
 
-        // 🎤 START MIC AGAIN AFTER SPEAKING
+        // 🎤 Restart mic after speaking
         restartListening();
     };
 
