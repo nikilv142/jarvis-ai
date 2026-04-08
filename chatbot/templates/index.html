@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Jarvis</title>
+    <title>Jarvis Voice AI</title>
 
     <style>
         body {
@@ -80,7 +80,6 @@
 
 <script>
 let recognition;
-let isSpeaking = false;
 let isRunning = false;
 
 function addMessage(text, className) {
@@ -107,18 +106,31 @@ function startJarvis() {
 
         console.log("Heard:", text);
 
-        // ❌ REMOVED interrupt logic
-
         document.getElementById("jarvisCircle").classList.add("listening");
 
         addMessage("You: " + text, "user");
+
+        // 🛑 STOP MIC BEFORE AI SPEAKS
+        recognition.stop();
+
         sendToAI(text);
     };
 
-    recognition.onerror = () => recognition.start();
-    recognition.onend = () => recognition.start();
+    recognition.onerror = () => restartListening();
+    recognition.onend = () => {
+        if (isRunning) restartListening();
+    };
 
     recognition.start();
+}
+
+// 🔁 Restart mic
+function restartListening() {
+    if (!isRunning) return;
+
+    try {
+        recognition.start();
+    } catch (e) {}
 }
 
 // 🤖 AI
@@ -136,18 +148,19 @@ async function sendToAI(message) {
     speak(data.reply);
 }
 
-// 🔊 Speak (no interruption)
+// 🔊 Speak
 function speak(text) {
     let speech = new SpeechSynthesisUtterance(text);
     speech.lang = "en-US";
 
-    isSpeaking = true;
     document.getElementById("jarvisCircle").classList.remove("listening");
     document.getElementById("jarvisCircle").classList.add("speaking");
 
     speech.onend = () => {
-        isSpeaking = false;
         document.getElementById("jarvisCircle").classList.remove("speaking");
+
+        // 🎤 START MIC AGAIN AFTER SPEAKING
+        restartListening();
     };
 
     speechSynthesis.speak(speech);
